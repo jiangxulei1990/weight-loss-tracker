@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#edf4ed"><title>轻盈计划 · 减脂打卡</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf4ed;color:#20382d;font:15px -apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}main{max-width:520px;margin:auto;padding:22px 16px 90px}.top{display:flex;justify-content:space-between;align-items:center}h1{font-size:27px;margin:8px 0}h2{font-size:18px;margin:0 0 14px}.muted{color:#789083;font-size:12px}.card{background:white;border-radius:20px;padding:20px;margin:14px 0;box-shadow:0 4px 20px #173e2010}.stats{display:flex;justify-content:space-between;margin-top:18px}.stats b{font-size:24px}.pill{background:#dceee0;border-radius:20px;padding:7px 12px;font-size:12px;color:#237247}.bar{height:9px;background:#e7eee8;border-radius:20px;overflow:hidden;margin:12px 0}.fill{height:100%;background:#37a16a;width:0%;transition:width .2s}.datebar{display:flex;gap:8px;align-items:center;justify-content:space-between}.datebar button,.btn{border:0;border-radius:12px;background:#e3f1e7;padding:11px 14px;color:#26724a;font-weight:600}.datebar input{font:inherit;border:0;color:#20382d;background:transparent;text-align:center;max-width:150px}.task{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #eff3ef;cursor:pointer}.task:last-child{border:0}.task input{accent-color:#2e9a64;width:22px;height:22px;flex-shrink:0}.task strong{display:block;margin-bottom:4px}.task small{display:block;color:#7a8b80;line-height:1.55}.task:has(input:checked) strong{text-decoration:line-through;color:#92a398}.field{width:100%;padding:12px;border:1px solid #e2eae4;border-radius:12px;font:inherit;background:#fbfdfb}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hint{font-size:12px;color:#789083;line-height:1.6}.btn{background:#2f9963;color:white;cursor:pointer}.buttons{display:flex;gap:8px;flex-wrap:wrap}.buttons button{flex:1}svg{width:100%;height:120px}footer{text-align:center;font-size:11px;color:#82958a;margin:20px 0}button{cursor:pointer}
+</style></head><body><main>
+<div class="top"><div><div class="muted">YOUR WELLNESS JOURNEY</div><h1>轻盈计划 🌿</h1><div class="muted">每天进步一点点 · 78 → 70 kg</div></div><span class="pill">第 1 阶段</span></div>
+<section class="card"><div class="stats"><div><div class="muted">起始体重</div><b>78.0</b><small> kg</small></div><div><div class="muted">最新体重</div><b id="latest">—</b><small> kg</small></div><div><div class="muted">目标体重</div><b>70.0</b><small> kg</small></div></div><div class="bar"><div class="fill" id="goalbar"></div></div><div class="muted" id="goaltext">开始记录你的第一天</div></section>
+<section class="card"><div class="datebar"><button id="prev">‹</button><input type="date" id="date"><button id="next">›</button></div><div class="stats"><div><h2 style="margin:0">今日打卡</h2><div class="muted">饮食 · 咖啡 · 运动 · 休息</div></div><div style="text-align:right"><b id="count">0/10</b><div class="muted">已完成</div></div></div><div class="bar"><div class="fill" id="daybar"></div></div><div id="tasks"></div></section>
+<section class="card"><h2>⚖️ 今日体重与记录</h2><div class="grid"><label>体重 kg<input class="field" type="number" id="weight" min="30" max="250" step="0.1" placeholder="如 77.8"></label><label>今日步数<input class="field" type="number" id="steps" min="0" step="100" placeholder="如 8000"></label></div><p class="muted">备注</p><textarea class="field" rows="3" id="note" placeholder="今天吃了什么、拿铁是否无糖、运动情况、胃部感受……"></textarea><p class="hint">记录自动保存在当前浏览器设备中；不会自动同步到其他设备。</p></section>
+<section class="card"><h2>📈 体重趋势（最近14次）</h2><svg id="chart" viewBox="0 0 320 120" aria-label="体重趋势图"></svg><div class="hint">每周看平均体重变化，不必在意单日波动。</div></section>
+<section class="card"><h2>💾 数据备份</h2><div class="buttons"><button class="btn" id="export">导出记录</button><button class="btn" id="importbtn">导入备份</button><input type="file" accept="application/json" id="importfile" hidden></div><p class="hint">清除 Safari 网站数据可能丢失打卡记录，建议定期导出备份。</p></section>
+<footer>温和减脂 · 每天约 1800–1900 kcal · 两杯无糖拿铁计入总热量<br>如出现反酸或腹部不适，减少或暂停咖啡。</footer>
+</main><script>
+(function(){
+const key='weight-loss-tracker-v1';
+let db={};try{db=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){db={}}
+const $=id=>document.getElementById(id),date=$('date');
+const localDay=d=>[d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
+date.value=localDay(new Date());
+const plans=[
+['周日','鸡蛋2个、燕麦40g、无糖高蛋白酸奶200g','米饭150g、瘦牛肉150g、蔬菜250g','虾仁180g、土豆200g、青菜250g','力量训练20分钟或轻松散步'],
+['周一','鸡蛋2个、全麦面包2片、无糖酸奶150g','米饭150g、去皮鸡腿肉180g、蔬菜250g','鱼肉180g、杂粮饭120g、青菜250g','加班日：散步10分钟，争取7000步'],
+['周二','鸡蛋2个、玉米1根、无糖酸奶200g','米饭150g、瘦里脊180g、蔬菜250g','鸡胸肉180g、红薯180g、青菜250g','加班日：轻松步行，争取7000步'],
+['周三','鸡蛋2个、全麦面包2片、无糖酸奶150g','米饭150g、牛肉180g、蔬菜250g','鱼肉180g、土豆200g、青菜250g','力量A：深蹲、俯卧撑、臀桥、平板支撑，2–3轮'],
+['周四','鸡蛋2个、燕麦40g、无糖酸奶200g','米饭150g、鸡胸肉180g、蔬菜250g','虾仁180g、红薯180g、青菜250g','加班恢复日：轻松步行，争取6000步'],
+['周五','鸡蛋2个、全麦面包2片、无糖酸奶150g','米饭150g、瘦牛肉180g、蔬菜250g','去皮鸡腿180g、杂粮饭120g、青菜250g','力量B：弓步蹲、背包划船、髋铰链、死虫式，2–3轮'],
+['周六','鸡蛋2个、全麦面包2片、无糖高蛋白酸奶150g','米饭150g、鸡胸肉180g、西兰花250g','清蒸鱼180g、红薯180g、青菜250g','快走40分钟，争取8000步']
+];
+function record(){return db[date.value]||(db[date.value]={done:[]})}
+function save(){try{localStorage.setItem(key,JSON.stringify(db))}catch(e){alert('保存失败，请导出备份')}} 
+function chart(){let a=Object.entries(db).filter(([k,v])=>v.weight>0).sort((a,b)=>a[0].localeCompare(b[0])).slice(-14);let svg=$('chart');if(a.length<2){svg.innerHTML='<text x="160" y="65" text-anchor="middle" fill="#9aac9e" font-size="12">记录至少2次体重后显示趋势</text>';return}let vals=a.map(x=>+x[1].weight),lo=Math.min(...vals)-.5,hi=Math.max(...vals)+.5;let points=vals.map((v,i)=>[16+i*288/(vals.length-1),100-(v-lo)/(hi-lo)*80]);svg.innerHTML='<polyline fill="none" stroke="#2f9963" stroke-width="3" stroke-linejoin="round" points="'+points.map(p=>p.join(',')).join(' ')+'"/>'+points.map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="#2f9963"/>').join('')+'<text x="8" y="115" font-size="10" fill="#789083">'+a[0][0].slice(5)+'</text><text x="312" y="115" text-anchor="end" font-size="10" fill="#789083">'+a[a.length-1][0].slice(5)+'</text>'}
+function render(){let r=record(),p=plans[new Date(date.value+'T12:00:00').getDay()],items=[
+['晨间称重','起床、如厕后，早餐前记录'],
+['早餐',p[1]],
+['第一杯拿铁','早餐后，无糖拿铁约250ml'],
+['午餐',p[2]],
+['第二杯拿铁','午餐后，无糖拿铁约200ml；有反酸则减少或暂停'],
+['下午加餐','无糖高蛋白酸奶150g + 一份水果'],
+['晚餐',p[3]],
+['今日运动',p[4]],
+['饮水','按口渴和活动量调整，通常约1.5–2L'],
+['睡眠与反流管理','尽量睡7小时；晚餐后至少2–3小时再躺下']
+];$('tasks').innerHTML='';items.forEach((item,i)=>{let label=document.createElement('label');label.className='task';let input=document.createElement('input');input.type='checkbox';input.checked=!!r.done[i];input.addEventListener('change',()=>{r.done[i]=input.checked;save();progress()});let box=document.createElement('span');let strong=document.createElement('strong');strong.textContent=item[0];let small=document.createElement('small');small.textContent=item[1];box.append(strong,small);label.append(input,box);$('tasks').append(label)});$('weight').value=r.weight||'';$('steps').value=r.steps||'';$('note').value=r.note||'';progress();summary();chart()}
+function progress(){let n=(record().done||[]).filter(Boolean).length;$('count').textContent=n+'/10';$('daybar').style.width=n*10+'%'}
+function summary(){let all=Object.entries(db).filter(([k,v])=>v.weight>0).sort((a,b)=>a[0].localeCompare(b[0]));let w=all.length?+all[all.length-1][1].weight:null;$('latest').textContent=w===null?'—':w.toFixed(1);let pct=w===null?0:Math.max(0,Math.min(100,(78-w)/8*100));$('goalbar').style.width=pct+'%';$('goaltext').textContent=w===null?'开始记录你的第一天':w<=70?'达到目标，继续健康维持！':'已减 '+Math.max(0,78-w).toFixed(1)+' kg · 距目标 '+Math.max(0,w-70).toFixed(1)+' kg'}
+date.addEventListener('change',render);$('prev').onclick=()=>shift(-1);$('next').onclick=()=>shift(1);
+function shift(n){let d=new Date(date.value+'T12:00:00');d.setDate(d.getDate()+n);date.value=localDay(d);render()}
+$('weight').addEventListener('input',e=>{let v=Number(e.target.value);record().weight=v>0?v:null;save();summary();chart()});
+$('steps').addEventListener('input',e=>{record().steps=Number(e.target.value)||null;save()});
+$('note').addEventListener('input',e=>{record().note=e.target.value;save()});
+$('export').onclick=()=>{let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='减脂打卡备份-'+localDay(new Date())+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+$('importbtn').onclick=()=>$('importfile').click();$('importfile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let obj=JSON.parse(await f.text());if(!obj||typeof obj!=='object'||Array.isArray(obj))throw Error();if(!confirm('导入将覆盖当前浏览器的打卡数据，是否继续？'))return;db=obj;save();render()}catch(err){alert('备份文件格式不正确')}e.target.value=''};
+render();
+})();
+</script></body></html>
